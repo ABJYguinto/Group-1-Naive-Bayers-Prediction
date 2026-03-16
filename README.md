@@ -174,23 +174,23 @@ for col in df.select_dtypes(include=["object", "string"]).columns:
 if "Unnamed: 0" in df.columns and df["Unnamed: 0"].nunique() == len(df):
     df = df.drop(columns=["Unnamed: 0"])
 
-# Optional: drop blank/anonymous test rows if a "name" column exists
+
 name_cols = [c for c in df.columns if "name" in c.lower()]
 if name_cols:
     df = df.dropna(subset=[name_cols[0]])
 
-# Heuristic: find the target column (contains 'play')
+
 target_candidates = [c for c in df.columns if "play" in c.lower()]
 if not target_candidates:
     raise RuntimeError("Couldn't find a target column (name containing 'play'). Columns: {}".format(df.columns.tolist()))
 target_col = target_candidates[0]
 
-# Feature columns are everything else
+
 feature_cols = [c for c in df.columns if c != target_col]
 if not feature_cols:
     raise RuntimeError("No feature columns detected.")
 
-# Normalizers
+
 def norm_target(x):
     s = str(x).strip().upper()
     if s in ("YES","Y","TRUE","T","1","PLAY","PLAY PICKLEBALL"):
@@ -224,12 +224,11 @@ def normalize_value(v):
         return "Normal"
     return s.title()
 
-# Apply normalization
 df[target_col] = df[target_col].apply(norm_target)
 for feat in feature_cols:
     df[feat] = df[feat].apply(normalize_value)
 
-# Build counts
+
 total_yes = int((df[target_col] == "YES").sum())
 total_no  = int((df[target_col] == "NO").sum())
 total = total_yes + total_no
@@ -336,12 +335,12 @@ for feat in feature_cols:
         user_input = user_input.strip().title()
     today[feat] = user_input
 
-# Compute and display step-by-step for this specific input
+
 print("\n=========================================")
 print(f"PREDICTING FOR: {today}")
 print("=========================================")
 
-# Show priors
+
 print(f"Prior P(YES) = {total_yes}/{total} = {total_yes/total:.4f}")
 print(f"Prior P(NO)  = {total_no}/{total} = {total_no/total:.4f}\n")
 
