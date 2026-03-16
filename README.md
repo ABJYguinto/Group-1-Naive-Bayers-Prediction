@@ -247,9 +247,7 @@ for feat in feature_cols:
         val = row[feat]
         counts[lab][feat][val] = counts[lab][feat].get(val, 0) + 1
 
-# --------------------------
-# 1) SHOW PRIORS & CONDITIONALS
-# --------------------------
+
 print("\n=== DATA SUMMARY ===")
 print(f"Total labelled responses: {total}  (YES={total_yes}, NO={total_no})")
 print(f"P(YES) = {total_yes}/{total} = {total_yes/total:.4f}")
@@ -268,9 +266,7 @@ for feat in feature_cols:
         p_n = (n / total_no)  if total_no>0 else 0.0
         print(f"  {v!s:12} -> YES: {y}/{total_yes} = {p_y:.4f}   NO: {n}/{total_no} = {p_n:.4f}")
 
-# --------------------------
-# 2) Build all combinations table with formulas & scores
-# --------------------------
+
 value_lists = [sorted(set(list(counts["YES"][feat].keys()) + list(counts["NO"][feat].keys())), key=lambda x: str(x)) for feat in feature_cols]
 all_combinations = list(itertools.product(*value_lists))
 
@@ -321,9 +317,6 @@ print(out_df[display_cols].to_string(index=False,
           "Percent_NO": "{:.4f}%".format
       }))
 
-# --------------------------
-# 3) NOW ASK FOR USER INPUT (after calculations are displayed)
-# --------------------------
 print("\n\n=== Now enter today's conditions (after seeing all calculations above) ===")
 options = {}
 for feat in feature_cols:
