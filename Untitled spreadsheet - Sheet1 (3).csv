@@ -1,0 +1,16 @@
+,Outlook,Temperature,Humidity,Windy,Play Pickleball
+0,Sunny,Mild,Normal,FALSE,Yes
+1,Rainy,Hot,High,TRUE,No
+2,Overcast,Cool,Normal,FALSE,Yes
+3,Sunny,Hot,High,FALSE,No
+4,Rainy,Mild,Normal,TRUE,No
+5,Sunny,Cool,Normal,TRUE,Yes
+6,Overcast,Hot,High,FALSE,No
+7,Rainy,Cool,Normal,FALSE,No
+8,Sunny,Mild,High,TRUE,Yes
+9,Overcast,Mild,High,TRUE,Yes
+10,Overcast,Hot,Normal,FALSE,Yes
+11,Rainy,Mild,High,FALSE,No
+12,Sunny,Cool,High,FALSE,Yes
+13,Rainy,Hot,Normal,FALSE,No
+14,Overcast,Cool,High,TRUE,Yes
