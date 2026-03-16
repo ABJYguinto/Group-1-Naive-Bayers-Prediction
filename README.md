@@ -38,6 +38,62 @@ This repository contains the dataset and probability calculations used to predic
 * **Q14:** Rainy, Hot Temp, Normal Humidity, Not Windy
 * **Q15:** Overcast, Cool Temp, High Humidity, Windy
 
+| ID | Outlook | Temperature | Humidity | Windy | Play Pickleball |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 0 | Sunny | Mild | Normal | FALSE | Yes |
+| 1 | Rainy | Hot | High | TRUE | No |
+| 2 | Overcast | Cool | Normal | FALSE | Yes |
+| 3 | Sunny | Hot | High | FALSE | No |
+| 4 | Rainy | Mild | Normal | TRUE | No |
+| 5 | Sunny | Cool | Normal | TRUE | Yes |
+| 6 | Overcast | Hot | High | FALSE | No |
+| 7 | Rainy | Cool | Normal | FALSE | No |
+| 8 | Sunny | Mild | High | TRUE | Yes |
+| 9 | Overcast | Mild | High | TRUE | Yes |
+| 10 | Overcast | Hot | Normal | FALSE | Yes |
+| 11 | Rainy | Mild | High | FALSE | No |
+| 12 | Sunny | Cool | High | FALSE | Yes |
+| 13 | Rainy | Hot | Normal | FALSE | No |
+| 14 | Overcast | Cool | High | TRUE | Yes |
 
+  The provided dataset functions as a structured historical log, recording environmental conditions and subsequent behavioral outcomes over a period of fifteen days. It is formatted as a standard relational table, where the rows represent individual observational records and the columns represent specific attributes of those records.
+
+Each horizontal row within the table signifies a single, discrete event—in this case, a specific day. The leftmost column, labeled "ID," serves as a sequential index or unique identifier for each observation, beginning at 0 and concluding at 14 to establish the 15-day scope of the data.
+
+The central columns—Outlook, Temperature, Humidity, and Windy—contain the independent variables. In predictive modeling, these are referred to as "features." These columns capture the specific meteorological conditions present on each respective day. "Outlook" categorizes the general sky condition (Sunny, Rainy, or Overcast), "Temperature" defines the thermal state (Hot, Mild, or Cool), "Humidity" specifies atmospheric moisture levels (High or Normal), and "Windy" acts as a boolean indicator (TRUE or FALSE) recording the presence of significant wind.
+
+The rightmost column, designated "Play Pickleball," represents the dependent variable, commonly known in machine learning as the "target" or "label." This column captures the binary final outcome (Yes or No), documenting whether the activity occurred under the specific weather conditions recorded in that exact row.
+
+When read from left to right, a single row yields a complete profile of a given day. For instance, the initial record (ID 0) documents a day characterized by a Sunny outlook, Mild temperature, Normal humidity, and a lack of wind (FALSE), culminating in a positive behavioral outcome ("Yes"). Conversely, the subsequent record (ID 1) logs a Rainy, Hot, High-humidity, and Windy day, resulting in a negative outcome ("No"). This tabular format systematically aligns environmental inputs with categorical outputs, providing the necessary structured data for algorithms to identify correlations and calculate future probabilities.
+
+### 1. Outlook
+| Outlook | Yes | No | P(Yes) | P(No) |
+| :--- | :--- | :--- | :--- | :--- |
+| Rainy | 0 | 5 | 0/8 | 5/7 |
+| Sunny | 4 | 1 | 4/8 | 1/7 |
+| Overcast | 4 | 1 | 4/8 | 1/7 |
+| **TOTAL** | **8** | **7** | | |
+
+### 2. Temperature
+| Temperature | Yes | No | P(Yes) | P(No) |
+| :--- | :--- | :--- | :--- | :--- |
+| Cool | 4 | 1 | 4/8 | 1/7 |
+| Mild | 3 | 2 | 3/8 | 2/7 |
+| Hot | 1 | 4 | 1/8 | 4/7 |
+| **TOTAL** | **8** | **7** | | |
+
+### 3. Humidity
+| Humidity | Yes | No | P(Yes) | P(No) |
+| :--- | :--- | :--- | :--- | :--- |
+| Normal | 4 | 3 | 4/8 | 3/7 |
+| High | 4 | 4 | 4/8 | 4/7 |
+| **TOTAL** | **8** | **7** | **8/15** | **7/15** |
+
+### 4. Windy
+| Windy | Yes | No | P(Yes) | P(No) |
+| :--- | :--- | :--- | :--- | :--- |
+| TRUE | 4 | 2 | 4/8 | 2/7 |
+| FALSE | 4 | 5 | 4/8 | 5/7 |
+| **TOTAL** | **8** | **7** | **8/15** | **7/15** |
 
 
