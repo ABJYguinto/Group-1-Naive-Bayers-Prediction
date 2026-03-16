@@ -100,5 +100,33 @@ The final two columns, "P(Yes)" and "P(No)," translate these raw counts into con
 
 By organizing the raw data into these specific mathematical fractions, the tables explicitly define historical behavioral trends. A review of the Outlook table reveals a 0/8 probability for the "Rainy" condition in the "Yes" column, indicating an absolute historical aversion to playing in the rain. Similarly, the Temperature table demonstrates that "Hot" conditions heavily favor a negative outcome, capturing four out of the seven total "No" decisions (4/7) compared to only one out of the eight "Yes" decisions (1/8). These calculated fractions provide the exact numerical weights the algorithm requires to compute the likelihood of playing under any future combination of weather conditions.
 
+### Probability Calculations
+
+| Combination | Yes Formula | No Formula | YES Probability | NO Probability |
+| :--- | :--- | :--- | :--- | :--- |
+| Sunny, Mild, Normal, Not Windy | 8/15(4/8 x 3/8 x 4/8 x 4/8) | 7/15(1/7 x 2/7 x 3/7 x 5/7) | 0.025 or 2.5% | 0.006 or 0.6% |
+| Rainy, Hot, High, Windy | 8/15(0/8 x 1/8 x 4/8 x 4/8) | 7/15(5/7 x 4/7 x 4/7 x 2/7) | 0 or 0% | 0.031 or 3.1% |
+| Overcast, Cool, Normal, Not Windy | 8/15(4/8 x 4/8 x 4/8 x 4/8) | 7/15(1/7 x 1/7 x 3/7 x 5/7) | 0.033 or 3.3% | 0.003 or 0.3% |
+| Sunny, Hot, High, Not Windy | 8/15(4/8 x 1/8 x 4/8 x 4/8) | 7/15(1/7 x 4/7 x 4/7 x 5/7) | 0.008 or 0.8% | 0.015 or 1.5% |
+| Rainy, Mild, Normal, Windy | 8/15(0/8 x 3/8 x 4/8 x 4/8) | 7/15(5/7 x 2/7 x 3/7 x 2/7) | 0 or 0% | 0.012 or 1.2% |
+| Sunny, Cool, Normal, Windy | 8/15(4/8 x 4/8 x 4/8 x 4/8) | 7/15(1/7 x 1/7 x 3/7 x 2/7) | 0.033 or 3.3% | 0.001 or 0.1% |
+| Overcast, Hot, High, Not Windy | 8/15(4/8 x 1/8 x 4/8 x 4/8) | 7/15(1/7 x 4/7 x 4/7 x 5/7) | 0.008 or 0.8% | 0.015 or 1.5% |
+| Rainy, Cool, Normal, Not Windy | 8/15(0/8 x 4/8 x 4/8 x 4/8) | 7/15(5/7 x 1/7 x 3/7 x 5/7) | 0 or 0% | 0.014 or 1.4% |
+| Sunny, Mild, High, Windy | 8/15(4/8 x 3/8 x 4/8 x 4/8) | 7/15(1/7 x 2/7 x 4/7 x 2/7) | 0.025 or 2.5% | 0.003 or 0.3% |
+| Overcast, Mild, High, Windy | 8/15(4/8 x 3/8 x 4/8 x 4/8) | 7/15(1/7 x 2/7 x 4/7 x 2/7) | 0.025 or 2.5% | 0.003 or 0.3% |
+| Overcast, Hot, Normal, Not Windy | 8/15(4/8 x 1/8 x 4/8 x 4/8) | 7/15(1/7 x 4/7 x 3/7 x 5/7) | 0.008 or 0.8% | 0.012 or 1.2% |
+| Rainy, Mild, High, Not Windy | 8/15(0/8 x 3/8 x 4/8 x 4/8) | 7/15(5/7 x 2/7 x 4/7 x 5/7) | 0 or 0% | 0.039 or 3.9% |
+| Sunny, Cool, High, Not Windy | 8/15(4/8 x 4/8 x 4/8 x 4/8) | 7/15(1/7 x 1/7 x 4/7 x 5/7) | 0.033 or 3.3% | 0.003 or 0.3% |
+| Rainy, Hot, Normal, Not Windy | 8/15(0/8 x 1/8 x 4/8 x 4/8) | 7/15(5/7 x 4/7 x 3/7 x 5/7) | 0 or 0% | 0.058 or 5.8% |
+| Overcast, Cool, High, Windy | 8/15(4/8 x 4/8 x 4/8 x 4/8) | 7/15(1/7 x 1/7 x 4/7 x 2/7) | 0.033 or 3.3% | 0.001 or 0.1% |
+
+It takes all the historical probability data gathered from the previous fifteen days and applies it to specific, theoretical weather scenarios to calculate the most mathematically likely outcome.
+
+The first column, labeled "Combination," sets the stage for each row. It defines the exact environmental parameters for a given day, combining Outlook, Temperature, Humidity, and Wind into a single, hypothetical scenario for the algorithm to evaluate.
+
+The next two columns, the "Yes Formula" and "No Formula," demonstrate the Naive Bayes algorithm in action. Let's examine the first row's "Yes Formula" as an example: 8/15(4/8 x 3/8 x 4/8 x 4/8). The first fraction on the outside, 8/15, represents the overall historical likelihood of playing pickleball regardless of the weather, known in data science as the "prior probability." The fractions inside the parentheses are the specific historical probabilities for each individual weather condition, pulled directly from the historical log. The algorithm multiplies the baseline chance of playing by the independent probabilities of it being sunny, mild, normal humidity, and not windy on previous "Yes" days. The "No Formula" applies the exact same mathematical logic, but draws its fractions solely from the historical days when the group decided to stay home.
+
+The final two columns display the mathematical result of multiplying those fractions together, presented as both a raw decimal and a percentage. To make a final prediction, the model simply compares the "YES Probability" to the "NO Probability." Whichever percentage is mathematically higher becomes the algorithm's official forecast. For instance, in the first row, 2.5% is greater than 0.6%, meaning the model predicts the group will play pickleball under those specific conditions. Alternatively, in the second row, the "Yes" probability drops to an absolute zero because the historical data showed the group never played when it was raining (0/8), making the "No" outcome the definitive winner.
+
 
 
