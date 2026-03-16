@@ -56,15 +56,11 @@ This repository contains the dataset and probability calculations used to predic
 | 13 | Rainy | Hot | Normal | FALSE | No |
 | 14 | Overcast | Cool | High | TRUE | Yes |
 
-  The provided dataset functions as a structured historical log, recording environmental conditions and subsequent behavioral outcomes over a period of fifteen days. It is formatted as a standard relational table, where the rows represent individual observational records and the columns represent specific attributes of those records.
+  The provided dataset serves as a detailed log of individual preferences, capturing how fifteen different people responded to specific environmental conditions. In this structure, the first column, labeled "ID," serves as a unique identifier for each person who participated in the survey. Numbered consecutively from 0 to 14, these IDs represent the fifteen individual respondents, ensuring that each person's specific weather preferences and their final decision are recorded on their own dedicated line.
 
-Each horizontal row within the table signifies a single, discrete event—in this case, a specific day. The leftmost column, labeled "ID," serves as a sequential index or unique identifier for each observation, beginning at 0 and concluding at 14 to establish the 15-day scope of the data.
+Moving across the table, the central columns—Outlook, Temperature, Humidity, and Windy—outline the exact weather conditions presented to each individual person. These categories act as the environmental factors for the survey. "Outlook" describes the general state of the sky, such as Sunny, Rainy, or Overcast. \"Temperature" provides the thermal condition, categorized simply as Cool, Mild, or Hot. "Humidity" notes the moisture level in the air, while "Windy" is a simple true or false indicator of a noticeable breeze. Together, these four columns paint a complete picture of the specific weather environment each survey participant was asked to evaluate.
 
-The central columns—Outlook, Temperature, Humidity, and Windy—contain the independent variables. In predictive modeling, these are referred to as "features." These columns capture the specific meteorological conditions present on each respective day. "Outlook" categorizes the general sky condition (Sunny, Rainy, or Overcast), "Temperature" defines the thermal state (Hot, Mild, or Cool), "Humidity" specifies atmospheric moisture levels (High or Normal), and "Windy" acts as a boolean indicator (TRUE or FALSE) recording the presence of significant wind.
-
-The rightmost column, designated "Play Pickleball," represents the dependent variable, commonly known in machine learning as the "target" or "label." This column captures the binary final outcome (Yes or No), documenting whether the activity occurred under the specific weather conditions recorded in that exact row.
-
-When read from left to right, a single row yields a complete profile of a given day. For instance, the initial record (ID 0) documents a day characterized by a Sunny outlook, Mild temperature, Normal humidity, and a lack of wind (FALSE), culminating in a positive behavioral outcome ("Yes"). Conversely, the subsequent record (ID 1) logs a Rainy, Hot, High-humidity, and Windy day, resulting in a negative outcome ("No"). This tabular format systematically aligns environmental inputs with categorical outputs, providing the necessary structured data for algorithms to identify correlations and calculate future probabilities.
+The final column on the far right, "Play Pickleball," records the ultimate choice made by each individual. After considering the unique combination of weather conditions presented in their row, the respondent provided a straightforward "Yes" or "No" answer indicating their willingness to play. By reading a single row from left to right, you can see exactly which person was surveyed, the specific weather conditions they were asked about, and the final choice they made. This layout organizes varied human opinions into a structured mathematical grid, making it possible to calculate the overall probability of the group playing under any future weather combination.
 
 ### 1. Outlook
 | Outlook | Yes | No | P(Yes) | P(No) |
@@ -95,5 +91,14 @@ When read from left to right, a single row yields a complete profile of a given 
 | TRUE | 4 | 2 | 4/8 | 2/7 |
 | FALSE | 4 | 5 | 4/8 | 5/7 |
 | **TOTAL** | **8** | **7** | **8/15** | **7/15** |
+
+The provided tables represent the aggregated frequency distributions and conditional probabilities derived from the fifteen-scenario historical log. In predictive modeling, these tables act as the mathematical engine of the algorithm, summarizing the raw situational data into actionable statistical ratios.
+
+Each table isolates one of the four environmental variables: Outlook, Temperature, Humidity, and Windy. The first two data columns, labeled "Yes" and "No," contain raw frequency counts. They tally exactly how many times a specific weather condition was present when the group ultimately decided to play or stay home. The bottom row of each table confirms the overall baseline of the dataset: across all fifteen recorded scenarios, there were exactly eight total "Yes" decisions and seven total "No" decisions.
+
+The final two columns, "P(Yes)" and "P(No)," translate these raw counts into conditional probabilities, where the "P" stands for probability. These fractions are calculated by dividing the specific condition's frequency count by the overall total for that decision category. For example, looking at the Outlook table, the "Sunny" condition coincided with four "Yes" decisions. Because there were eight total "Yes" decisions in the entire dataset, the probability of the weather being sunny given that the group played—expressed as P(Yes)—is 4/8. Conversely, a sunny outlook only occurred on one of the seven "No" days, making its P(No) ratio 1/7.
+
+By organizing the raw data into these specific mathematical fractions, the tables explicitly define historical behavioral trends. A review of the Outlook table reveals a 0/8 probability for the "Rainy" condition in the "Yes" column, indicating an absolute historical aversion to playing in the rain. Similarly, the Temperature table demonstrates that "Hot" conditions heavily favor a negative outcome, capturing four out of the seven total "No" decisions (4/7) compared to only one out of the eight "Yes" decisions (1/8). These calculated fractions provide the exact numerical weights the algorithm requires to compute the likelihood of playing under any future combination of weather conditions.
+
 
 
