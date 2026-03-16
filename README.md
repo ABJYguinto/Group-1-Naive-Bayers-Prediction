@@ -367,7 +367,7 @@ elif score_no > score_yes:
     print(" Prediction: NO (Stay home) ")
 else:
     # tie or both zero
-    print("⚖ Prediction is tied or inconclusive (equal scores).")
+    print(" Prediction is tied or inconclusive (equal scores).")
     fallback = "YES" if total_yes >= total_no else "NO"
     print("Fallback majority:", fallback)
 
