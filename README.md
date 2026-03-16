@@ -130,3 +130,252 @@ The final two columns display the mathematical result of multiplying those fract
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Code:
+
+import pandas as pd
+import itertools
+
+
+CSV_PATH = "Untitled spreadsheet - Sheet1 (3).csv"
+
+
+# Load CSV
+df = pd.read_csv(CSV_PATH)
+
+
+df.columns = [c.strip() for c in df.columns]
+for col in df.select_dtypes(include=["object", "string"]).columns:
+    df[col] = df[col].astype(str).str.strip()
+
+
+if "Unnamed: 0" in df.columns and df["Unnamed: 0"].nunique() == len(df):
+    df = df.drop(columns=["Unnamed: 0"])
+
+# Optional: drop blank/anonymous test rows if a "name" column exists
+name_cols = [c for c in df.columns if "name" in c.lower()]
+if name_cols:
+    df = df.dropna(subset=[name_cols[0]])
+
+# Heuristic: find the target column (contains 'play')
+target_candidates = [c for c in df.columns if "play" in c.lower()]
+if not target_candidates:
+    raise RuntimeError("Couldn't find a target column (name containing 'play'). Columns: {}".format(df.columns.tolist()))
+target_col = target_candidates[0]
+
+# Feature columns are everything else
+feature_cols = [c for c in df.columns if c != target_col]
+if not feature_cols:
+    raise RuntimeError("No feature columns detected.")
+
+# Normalizers
+def norm_target(x):
+    s = str(x).strip().upper()
+    if s in ("YES","Y","TRUE","T","1","PLAY","PLAY PICKLEBALL"):
+        return "YES"
+    if s in ("NO","N","FALSE","F","0","DONT","DON'T","DO NOT"):
+        return "NO"
+    return s
+
+def normalize_value(v):
+    s = str(v).strip()
+    low = s.lower()
+    if low in ("true","t","yes","y","1"):
+        return "True"
+    if low in ("false","f","no","n","0"):
+        return "False"
+    if low in ("hot","high","hi"):
+        return "Hot"
+    if low in ("mild","normal","mid","medium"):
+        return "Mild"
+    if low in ("cool","cold"):
+        return "Cool"
+    if low in ("overcast","overcast."):
+        return "Overcast"
+    if low in ("sunny","sun"):
+        return "Sunny"
+    if low in ("rainy","rain"):
+        return "Rainy"
+    if low in ("high humidity","high humidity.","high"):
+        return "High"
+    if low in ("normal humidity","normal"):
+        return "Normal"
+    return s.title()
+
+# Apply normalization
+df[target_col] = df[target_col].apply(norm_target)
+for feat in feature_cols:
+    df[feat] = df[feat].apply(normalize_value)
+
+# Build counts
+total_yes = int((df[target_col] == "YES").sum())
+total_no  = int((df[target_col] == "NO").sum())
+total = total_yes + total_no
+if total == 0:
+    raise RuntimeError("No labelled YES/NO rows found in CSV.")
+
+counts = {"YES": {}, "NO": {}}
+for feat in feature_cols:
+    counts["YES"][feat] = {}
+    counts["NO"][feat] = {}
+    for _, row in df.iterrows():
+        lab = row[target_col]
+        if lab not in ("YES", "NO"):
+            continue
+        val = row[feat]
+        counts[lab][feat][val] = counts[lab][feat].get(val, 0) + 1
+
+# --------------------------
+# 1) SHOW PRIORS & CONDITIONALS
+# --------------------------
+print("\n=== DATA SUMMARY ===")
+print(f"Total labelled responses: {total}  (YES={total_yes}, NO={total_no})")
+print(f"P(YES) = {total_yes}/{total} = {total_yes/total:.4f}")
+print(f"P(NO)  = {total_no}/{total} = {total_no/total:.4f}")
+
+print("\n=== CONDITIONAL COUNTS & PROBABILITIES ===")
+for feat in feature_cols:
+    yes_total_feat = sum(counts["YES"][feat].values())
+    no_total_feat  = sum(counts["NO"][feat].values())
+    vals = sorted(set(list(counts["YES"][feat].keys()) + list(counts["NO"][feat].keys())), key=lambda x: str(x))
+    print(f"\nFeature: {feat}  (counts among YES: {yes_total_feat}, among NO: {no_total_feat})")
+    for v in vals:
+        y = counts["YES"][feat].get(v, 0)
+        n = counts["NO"][feat].get(v, 0)
+        p_y = (y / total_yes) if total_yes>0 else 0.0
+        p_n = (n / total_no)  if total_no>0 else 0.0
+        print(f"  {v!s:12} -> YES: {y}/{total_yes} = {p_y:.4f}   NO: {n}/{total_no} = {p_n:.4f}")
+
+# --------------------------
+# 2) Build all combinations table with formulas & scores
+# --------------------------
+value_lists = [sorted(set(list(counts["YES"][feat].keys()) + list(counts["NO"][feat].keys())), key=lambda x: str(x)) for feat in feature_cols]
+all_combinations = list(itertools.product(*value_lists))
+
+rows = []
+for combo in all_combinations:
+    combo_dict = dict(zip(feature_cols, combo))
+    parts_yes = []
+    parts_no  = []
+    prod_yes = total_yes/total
+    prod_no  = total_no/total
+    parts_yes.append(f"P(YES)={total_yes}/{total}")
+    parts_no.append(f"P(NO)={total_no}/{total}")
+
+    for feat, val in combo_dict.items():
+        y_count = counts["YES"][feat].get(val, 0)
+        n_count = counts["NO"][feat].get(val, 0)
+        parts_yes.append(f"P({feat}={val}|YES)={y_count}/{total_yes}")
+        parts_no.append(f"P({feat}={val}|NO)={n_count}/{total_no}")
+        p_fg_yes = (y_count / total_yes) if total_yes>0 else 0.0
+        p_fg_no  = (n_count / total_no) if total_no>0 else 0.0
+        prod_yes *= p_fg_yes
+        prod_no  *= p_fg_no
+
+    formula_yes = " * ".join(parts_yes)
+    formula_no  = " * ".join(parts_no)
+    pred = "YES" if prod_yes > prod_no else ("NO" if prod_no > prod_yes else "TIE")
+    rows.append({
+        "Combination": " | ".join(f"{k}={v}" for k,v in combo_dict.items()),
+        "Formula_YES": formula_yes,
+        "Score_YES": prod_yes,
+        "Percent_YES": prod_yes*100,
+        "Formula_NO": formula_no,
+        "Score_NO": prod_no,
+        "Percent_NO": prod_no*100,
+        "Prediction": pred
+    })
+
+out_df = pd.DataFrame(rows)
+pd.set_option("display.max_colwidth", 300)
+display_cols = ["Combination","Formula_YES","Score_YES","Percent_YES","Formula_NO","Score_NO","Percent_NO","Prediction"]
+
+print("\n\n=== ALL COMBINATIONS & FORMULAS ===")
+print(out_df[display_cols].to_string(index=False,
+      formatters={
+          "Score_YES": "{:.8f}".format,
+          "Percent_YES": "{:.4f}%".format,
+          "Score_NO": "{:.8f}".format,
+          "Percent_NO": "{:.4f}%".format
+      }))
+
+# --------------------------
+# 3) NOW ASK FOR USER INPUT (after calculations are displayed)
+# --------------------------
+print("\n\n=== Now enter today's conditions (after seeing all calculations above) ===")
+options = {}
+for feat in feature_cols:
+    vals = sorted(set(list(counts["YES"][feat].keys()) + list(counts["NO"][feat].keys())), key=lambda x: str(x))
+    options[feat] = vals
+    print(f"{feat} options: {', '.join(map(str, vals))}")
+
+# Collect user input
+today = {}
+for feat in feature_cols:
+    user_input = input(f"What is the {feat}? ").strip()
+    if user_input.lower() in ("true","t","yes","y","1"):
+        user_input = "True"
+    elif user_input.lower() in ("false","f","no","n","0"):
+        user_input = "False"
+    else:
+        user_input = user_input.strip().title()
+    today[feat] = user_input
+
+# Compute and display step-by-step for this specific input
+print("\n=========================================")
+print(f"PREDICTING FOR: {today}")
+print("=========================================")
+
+# Show priors
+print(f"Prior P(YES) = {total_yes}/{total} = {total_yes/total:.4f}")
+print(f"Prior P(NO)  = {total_no}/{total} = {total_no/total:.4f}\n")
+
+score_yes = total_yes/total
+score_no  = total_no/total
+for feat, val in today.items():
+    y_count = counts["YES"][feat].get(val, 0)
+    n_count = counts["NO"][feat].get(val, 0)
+    p_fg_yes = (y_count / total_yes) if total_yes>0 else 0.0
+    p_fg_no  = (n_count / total_no)  if total_no>0 else 0.0
+    print(f"P({feat}={val} | YES) = {y_count}/{total_yes} = {p_fg_yes:.4f}")
+    print(f"P({feat}={val} | NO)  = {n_count}/{total_no} = {p_fg_no:.4f}\n")
+    score_yes *= p_fg_yes
+    score_no  *= p_fg_no
+
+print("=========================================")
+print(f"FINAL SCORE YES : {score_yes:.8f}")
+print(f"FINAL SCORE NO  : {score_no:.8f}")
+print("=========================================")
+
+if score_yes > score_no:
+    print(" Prediction: YES (Play Pickleball!) ")
+elif score_no > score_yes:
+    print(" Prediction: NO (Stay home) ")
+else:
+    # tie or both zero
+    print("⚖ Prediction is tied or inconclusive (equal scores).")
+    fallback = "YES" if total_yes >= total_no else "NO"
+    print("Fallback majority:", fallback)
+
